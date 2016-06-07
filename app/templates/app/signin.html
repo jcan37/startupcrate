@@ -2,4 +2,69 @@
 
 {% block title %}Sign In - StartupCrate{% endblock %}
 
-{% block content %}{% endblock %}
+{% block style %}
+    <style>
+        .wide-input {
+            margin: 8px auto;
+            width: 100%;
+            border-radius: 4px;
+        }
+        .signin-card {
+            margin: 16px;
+            padding: 16px;
+            background: white;
+            border-radius: 4px;
+        }
+        .error-message {
+            color: red;
+        }
+        #signin-content {
+            padding: 192px 0 256px 0;
+            background: lightgray;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="signin-content" class="row">
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-4 col-sm-4">
+            <h1>Sign In</h1>
+        </div>
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-4 col-sm-4">
+            <div class="signin-card">
+                <div class="row">
+                    {% if request.GET.next %}
+                        <form id="signin-form" method="post" action="/signin/?next={{ request.GET.next }}">
+                    {% else %}
+                        <form id="signin-form" method="post" action="/signin/">
+                    {% endif %}
+                    {% csrf_token %}
+                    <div class="col-xs-12 col-sm-12">
+                        <input name="username" class="wide-input form-control" type="text" placeholder="Username"
+                               pattern="^[A-Za-z0-9_@+.-]{4,30}$"
+                               title="4 to 30 alphanumeric, _, @, +, . and - characters" maxlength="30" required>
+                    </div>
+                    <div class="col-xs-12 col-sm-12">
+                        <input name="password" class="wide-input form-control" type="password"
+                               placeholder="Password (min 8 characters)" pattern=".{8,}"
+                               title="At least 8 characters" required>
+                    </div>
+                    <div class="col-xs-12 col-sm-12">
+                        <input class="wide-input blue btn btn-primary" type="submit" value="Sign In">
+                    </div>
+                    <div class="col-xs-12 col-sm-12">
+                        {% if invalid %}
+                            <p class="error-message">Invalid credentials submitted.</p>
+                        {% elif disabled %}
+                            <p class="error-message">That account has been blocked.</p>
+                        {% endif %}
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-4 col-sm-4">
+            <h4>Need an account? <a href="/signup/">Sign up.</a></h4>
+        </div>
+    </div>
+{% endblock %}

@@ -29,8 +29,12 @@
         .dark-content {
             color: white;
         }
+        #user-greeting {
+            padding: 15px;
+            color: #9d9d9d;
+        }
         #content-footer {
-            padding: 16px;
+            padding: 8px;
         }
         @media (min-width: 768px) {
             .navbar-right {
@@ -41,7 +45,7 @@
     {% block style %}{% endblock %}
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file://
     <!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
@@ -66,12 +70,24 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="startup-crate-navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li>
-                    <a href="/signup/">Sign Up</a>
-                </li>
-                <li>
-                    <a href="/signin/">Sign In</a>
-                </li>
+                {% if request.user.is_authenticated %}
+                    <li>
+                        <div id="user-greeting">Hello, {{ request.user.first_name }}.</div>
+                    </li>
+                    <li>
+                        <a href="/settings/">Your Account</a>
+                    </li>
+                    <li>
+                        <a href="/signout/">Sign Out</a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="/signup/">Sign Up</a>
+                    </li>
+                    <li>
+                        <a href="/signin/">Sign In</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
         <!-- /.navbar-collapse -->
@@ -93,23 +109,6 @@
 <script src="{% static 'js/bootstrap.min.js' %}"></script>
 
 <!-- Custom JavaScript -->
-<script>
-    // smooth scrolling links
-    $(function() {
-        $('a[href*="#"]:not([href="#"])').click(function() {
-            if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
-                var target = $(this.hash);
-                target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
-                if (target.length) {
-                    $('html, body').animate({
-                    scrollTop: target.offset().top
-                    }, 1000);
-                    return false;
-                }
-            }
-        });
-    });
-</script>
 {% block execute %}{% endblock %}
 
 </body>

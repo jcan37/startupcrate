@@ -2,4 +2,129 @@
 
 {% block title %}Settings - StartupCrate{% endblock %}
 
-{% block content %}{% endblock %}
+
+{% block style %}
+    <style>
+        hr {
+            border-top: gray solid 1px;
+        }
+        .wide-input {
+            margin: 8px auto;
+            width: 100%;
+            border-radius: 4px;
+        }
+        .settings-card {
+            margin: 16px;
+            padding: 16px;
+            background: white;
+            border-radius: 4px;
+        }
+        .success-message {
+            color: #96c061;
+        }
+        .error-message {
+            color: red;
+        }
+        #settings-content {
+            padding: 96px 0 192px 0;
+            background: lightgray;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="settings-content" class="row">
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-4 col-sm-4">
+            <h1>Account Settings</h1>
+        </div>
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-4 col-sm-4">
+            <div class="settings-card">
+                <div class="row">
+                    <form id="settings-form" method="post" action="/settings/">
+                        {% csrf_token %}
+                        <div class="col-xs-12 col-sm-6">
+                            <input name="fname" class="wide-input form-control" type="text" placeholder="First name"
+                                   pattern="^[A-Za-z-]{2,30}$" title="2 to 30 alphabetic characters" maxlength="30"
+                                   required value="{{ request.user.first_name }}">
+                        </div>
+                        <div class="col-xs-12 col-sm-6">
+                            <input name="lname" class="wide-input form-control" type="text" placeholder="Last name"
+                                   pattern="^[A-Za-z-]{2,30}$" title="2 to 30 alphabetic characters" maxlength="30"
+                                   required value="{{ request.user.last_name }}">
+                        </div>
+                        <div class="col-xs-12 col-sm-12">
+                            <input name="email" class="wide-input form-control" type="email" placeholder="Email"
+                                   required value="{{ request.user.email }}">
+                        </div>
+                        <div class="col-xs-12 col-sm-12">
+                            <input name="shipaddr" class="wide-input form-control" type="text"
+                                   placeholder="Shipping address" maxlength="256" required value="{{ ship_addr }}">
+                        </div>
+                        <div class="col-xs-12 col-sm-6">
+                            <input name="newpass" class="wide-input form-control" type="password"
+                                   placeholder="New password (min 8 characters)" pattern=".{0}|.{8,}"
+                                   title="Empty or at least 8 characters">
+                        </div>
+                        <div class="col-xs-12 col-sm-6">
+                            <input name="newpass2" class="wide-input form-control" type="password"
+                                   placeholder="Retype new password" pattern=".{0}|.{8,}"
+                                   title="Empty or at least 8 characters">
+                            <p id="password-mismatch" class="error-message" hidden>Passwords do not match.</p>
+                        </div>
+                        <div class="col-xs-12 col-sm-12"><hr></div>
+                        <div class="col-xs-12 col-sm-12">
+                            <label>To save your changes, please enter your password.</label>
+                            <input name="password" class="wide-input form-control" type="password"
+                                   placeholder="Current password" pattern=".{8,}" title="At least 8 characters"
+                                   required>
+                        </div>
+                        <div class="col-xs-12 col-sm-12">
+                            <input class="wide-input green btn btn-success" type="submit" value="Save Changes">
+                        </div>
+                        <div class="col-xs-12 col-sm-12">
+                            {% if invalid_credentials %}
+                                <p class="error-message">Invalid current password.</p>
+                            {% elif invalid_fields %}
+                                <p class="error-message">Invalid fields submitted.</p>
+                            {% elif changes_saved %}
+                                <p class="success-message">Your changes have been saved.</p>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-4 col-sm-4">
+            <h4>Unhappy? <a role="button" data-toggle="collapse" href="#delete-collapse" aria-expanded="false"
+                            aria-controls="delete-collapse">Delete your account.</a></h4>
+            <div class="collapse settings-card" id="delete-collapse">
+                <form id="settings-form" method="post" action="/settings/">
+                    {% csrf_token %}
+                    <label>To delete your account, please enter your password.</label>
+                    <label class="error-message">This action cannot be undone.</label>
+                    <input name="password" class="wide-input form-control" type="password"
+                           placeholder="Current password" pattern=".{8,}" title="At least 8 characters"
+                           required>
+                    <input name="delete" class="wide-input blue btn btn-primary" type="submit" value="Delete account">
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block execute %}
+    <script>
+        $(function() {
+            var password = $('input[name="newpass"]');
+            var password2 = $('input[name="newpass2"]');
+            $('#settings-form').submit(function(e) {
+                e.preventDefault();
+                if (password.val() != password2.val()) {
+                    $('#password-mismatch').show();
+                    return;
+                }
+                this.submit();
+            });
+        });
+    </script>
+{% endblock %}

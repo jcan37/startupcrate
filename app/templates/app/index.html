@@ -79,7 +79,7 @@
             font-size: 12px;
         }
         #content-header {
-            background: #ffffff url({% static 'img/backdrop.png' %}) no-repeat center top;
+            background: #45b1e2 url({% static 'img/backdrop.png' %}) no-repeat center top;
         }
         #content-header .section-title {
             padding: 256px 0 32px 0;
@@ -97,13 +97,13 @@
 
 {% block content %}
     <div id="content-header" class="row dark-content">
-        <div class="col-xs-offset-1 col-xs-10 col-sm-offset-4 col-sm-4">
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-4 col-sm-4">
             <div class="section-title">A monthly box of startup goodies.</div>
         </div>
-        <div class="button-container col-xs-offset-1 col-xs-10 col-sm-offset-4 col-sm-2">
+        <div class="button-container col-xs-offset-0 col-xs-12 col-sm-offset-4 col-sm-2">
             <a class="wide-button green btn btn-success" href="#content-choose">GET STARTED</a>
         </div>
-        <div class="button-container col-xs-offset-1 col-xs-10 col-sm-offset-0 col-sm-2">
+        <div class="button-container col-xs-offset-0 col-xs-12 col-sm-offset-0 col-sm-2">
             <a class="wide-button blue btn btn-primary" href="#content-choose">GIVE A GIFT</a>
         </div>
         <div id="countdown" class="col-xs-12 col-sm-12">
@@ -120,10 +120,10 @@
         </div>
     </div>
     <div id="content-how" class="row content-section">
-        <div class="col-xs-offset-1 col-xs-10 col-sm-offset-3 col-sm-6">
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-3 col-sm-6">
             <div class="section-title">How It Works</div>
         </div>
-        <div class="col-xs-offset-1 col-xs-10 col-sm-offset-3 col-sm-3">
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-3 col-sm-3">
             <div class="step-div">
                 <div class="step-graphic blue-text blue-border">
                     <span class="step-number">1</span>
@@ -133,7 +133,7 @@
                 <h3>1 and 3 month plans are available. You can cancel anytime. Shipping not included.</h3>
             </div>
         </div>
-        <div class="col-xs-offset-1 col-xs-10 col-sm-offset-0 col-sm-3">
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-0 col-sm-3">
             <div class="step-div">
                 <div class="step-graphic green-text green-border">
                     <span class="step-number">2</span>
@@ -143,32 +143,32 @@
                 <h3>Startup crates are shipped on the 25th of every month, filled with startup goodies!</h3>
             </div>
         </div>
-        <div class="section-footer button-container col-xs-offset-1 col-xs-10 col-sm-offset-5 col-sm-2">
+        <div class="section-footer button-container col-xs-offset-0 col-xs-12 col-sm-offset-5 col-sm-2">
             <a class="wide-button blue btn btn-primary" href="#content-choose">GET STARTED</a>
         </div>
     </div>
     <div id="content-choose" class="row content-section">
-        <div class="col-xs-offset-1 col-xs-10 col-sm-offset-3 col-sm-6">
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-3 col-sm-6">
             <div class="section-title">Choose Your Startup Crate</div>
         </div>
-        <div class="col-xs-offset-1 col-xs-10 col-sm-offset-3 col-sm-3">
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-3 col-sm-3">
             <div class="crate-card">
                 <h1>1 Month Plan</h1>
                 <div class="crate-price blue-text">
                     <span class="value" id="days">$15.95</span><span class="units">/mo + $5 S/H</span>
                 </div>
                 <img class="crate-img" src="{% static 'img/1month.png' %}">
-                <a class="wide-button blue btn btn-primary">SELECT CRATE</a>
+                <a class="wide-button blue btn btn-primary" href="/crate/1/">SELECT CRATE</a>
             </div>
         </div>
-        <div class="col-xs-offset-1 col-xs-10 col-sm-offset-0 col-sm-3">
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-0 col-sm-3">
             <div class="crate-card">
                 <h1>3 Month Plan</h1>
                 <div class="crate-price blue-text">
                     <span class="value" id="days">$14.25</span><span class="units">/mo + $5 S/H</span>
                 </div>
                 <img class="crate-img" src="{% static 'img/3month.png' %}">
-                <a class="wide-button blue btn btn-primary">SELECT CRATE</a>
+                <a class="wide-button blue btn btn-primary" href="/crate/3/">SELECT CRATE</a>
             </div>
         </div>
     </div>
@@ -187,6 +187,18 @@
                 $('#hours').html(ts.hours);
                 $('#minutes').html(ts.minutes);
             }, countdown.DAYS|countdown.HOURS|countdown.MINUTES);
+            $('a[href*="#"]:not([href="#"])').click(function() {
+                if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+                    var target = $(this.hash);
+                    target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+                    if (target.length) {
+                        $('html, body').animate({
+                        scrollTop: target.offset().top
+                        }, 1000);
+                        return false;
+                    }
+                }
+            });
         });
     </script>
 {% endblock %}

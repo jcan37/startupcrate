@@ -1,5 +1,112 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 
 {% block title %}Sign Up - StartupCrate{% endblock %}
 
-{% block content %}{% endblock %}
+{% block style %}
+    <style>
+        .wide-input {
+            margin: 8px auto;
+            width: 100%;
+            border-radius: 4px;
+        }
+        .signup-card {
+            margin: 16px;
+            padding: 16px;
+            background: white;
+            border-radius: 4px;
+        }
+        .error-message {
+            color: red;
+        }
+        #signup-content {
+            padding: 96px 0 192px 0;
+            background: lightgray;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="signup-content" class="row">
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-4 col-sm-4">
+            <h1>Register</h1>
+        </div>
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-4 col-sm-4">
+            <div class="signup-card">
+                <div class="row">
+                    <form id="signup-form" method="post" action="/signup/">
+                        {% csrf_token %}
+                        <div class="col-xs-12 col-sm-6">
+                            <input name="fname" class="wide-input form-control" type="text" placeholder="First name"
+                                   pattern="^[A-Za-z-]{2,30}$" title="2 to 30 alphabetic characters" maxlength="30"
+                                   required value="{{ fname }}">
+                        </div>
+                        <div class="col-xs-12 col-sm-6">
+                            <input name="lname" class="wide-input form-control" type="text" placeholder="Last name"
+                                   pattern="^[A-Za-z-]{2,30}$" title="2 to 30 alphabetic characters" maxlength="30"
+                                   required value="{{ lname }}">
+                        </div>
+                        <div class="col-xs-12 col-sm-12">
+                            <input name="email" class="wide-input form-control" type="email" placeholder="Email"
+                                   required value="{{ email }}">
+                        </div>
+                        <div class="col-xs-12 col-sm-12">
+                            <input name="shipaddr" class="wide-input form-control" type="text"
+                                   placeholder="Shipping address" maxlength="256" required value="{{ ship_addr }}">
+                        </div>
+                        <div class="col-xs-12 col-sm-12">
+                            <input name="giftaddr" class="wide-input form-control" type="text"
+                                   placeholder="Gift address (optional)" maxlength="256" value="{{ gift_addr }}">
+                        </div>
+                        <div class="col-xs-12 col-sm-12">
+                            <input name="username" class="wide-input form-control" type="text" placeholder="Username"
+                                   pattern="^[A-Za-z0-9_@+.-]{4,30}$"
+                                   title="4 to 30 alphanumeric, _, @, +, . and - characters" maxlength="30" required>
+                            {% if user_exists %}
+                                <p class="error-message">That username is already taken.</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-xs-12 col-sm-6">
+                            <input name="password" class="wide-input form-control" type="password"
+                                   placeholder="Password (min 8 characters)" pattern=".{8,}"
+                                   title="At least 8 characters" required>
+                        </div>
+                        <div class="col-xs-12 col-sm-6">
+                            <input name="password2" class="wide-input form-control" type="password"
+                                   placeholder="Retype password" pattern=".{8,}" title="At least 8 characters" required>
+                            <p id="password-mismatch" class="error-message" hidden>Passwords do not match.</p>
+                        </div>
+                        <div class="col-xs-12 col-sm-12">
+                            <input class="wide-input green btn btn-success" type="submit" value="Create Account">
+                        </div>
+                        {% if invalid %}
+                            <div class="col-xs-12 col-sm-12">
+                                <p class="error-message">Invalid fields submitted.</p>
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-4 col-sm-4">
+            <h4>Already have an account? <a href="/signin/">Log in.</a></h4>
+        </div>
+    </div>
+{% endblock %}
+
+{% block execute %}
+    <script>
+        $(function() {
+            var password = $('input[name="password"]');
+            var password2 = $('input[name="password2"]');
+            $('#signup-form').submit(function(e) {
+                e.preventDefault();
+                if (password.val() != password2.val()) {
+                    $('#password-mismatch').show();
+                    return;
+                }
+                this.submit();
+            });
+        });
+    </script>
+{% endblock %}
