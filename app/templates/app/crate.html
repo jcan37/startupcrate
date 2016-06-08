@@ -76,6 +76,8 @@
                             {% csrf_token %}
                             <div class="col-xs-12 col-sm-12">
                                 <label class="spaced">Ship to {{ personal_addr }}</label>
+                            </div>
+                            <div class="col-xs-12 col-sm-12">
                                 <a class="spaced green btn btn-success" href="/settings/">Change Address</a>
                             </div>
                             <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
