@@ -1,9 +1,12 @@
-from app.models import Address
+from app.models import Address, Subscription
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from itertools import chain
+import stripe
+stripe.api_key = "sk_test_7omNc4LQGjHI7viCIxfGfIr5"
 
 
 def index(request):
@@ -65,12 +68,68 @@ def signout(request):
 
 @login_required
 def crate(request, plan):
-    return render(request, 'app/crate.html', {'plan': plan})
+    context = {'plan': plan, 'personal_addr': Address.objects.get(user=request.user, personal=True),
+               'gift_addrs': Address.objects.filter(user=request.user, personal=False)}
+    if request.method == 'POST':
+        subscription = None
+        stripe_plan = 'startupcrate_monthly' if plan == '1' else 'startupcrate_quarterly'
+        if 'recipient' in request.POST:
+            recipient = request.POST['recipient']
+            address_id = request.POST['pastaddr']
+            address = None
+            if int(address_id) > 0:
+                address = Address.objects.get(pk=address_id)
+            if not address:
+                address = Address(user=request.user, value=request.POST['newaddr'])
+        else:
+            recipient = '{0} {1}'.format(request.user.first_name, request.user.last_name)
+            address = context['personal_addr']
+        try:
+            address.full_clean()
+            address.save()
+            subscription = Subscription(ship_address=address, recipient_name=recipient)
+            subscription.full_clean()
+            subscription.save()
+            customer = stripe.Customer.create(source=request.POST['stripeToken'], plan=stripe_plan,
+                                              email=request.POST['stripeEmail'])
+            subscription.stripe_customer = customer['id']
+            subscription.save()
+            return HttpResponseRedirect('/subscriptions/')
+        except Exception as e:
+            print(e.message)
+            context['invalid'] = True
+            if subscription:
+                subscription.delete()
+    return render(request, 'app/crate.html', context)
 
 
 @login_required
 def subscriptions(request):
-    return render(request, 'app/subscriptions.html')
+    if request.method == 'POST':
+        print(request.POST)
+        address_id = request.POST['pastaddr']
+        address = None
+        if int(address_id) > 0:
+            address = Address.objects.get(pk=address_id)
+        if not address:
+            address = Address(user=request.user, value=request.POST['newaddr'])
+        try:
+            subscription = Subscription.objects.get(pk=request.POST['subscription_id'])
+            address.full_clean()
+            address.save()
+            subscription.ship_address = address
+            subscription.full_clean()
+            subscription.save()
+        except Exception as e:
+            print(e.message)
+    context = {
+        'personal_subs': Subscription.objects.filter(
+            ship_address=Address.objects.filter(user=request.user, personal=True)),
+        'gift_addrs': Address.objects.filter(user=request.user, personal=False)
+    }
+    context['gift_subs'] = Subscription.objects.filter(ship_address__in=context['gift_addrs'])
+    context['subscriptions'] = list(chain(context['personal_subs'], context['gift_subs']))
+    return render(request, 'app/subscriptions.html', context)
 
 
 @login_required
@@ -82,6 +141,9 @@ def settings(request):
         if authenticate(username=username, password=password) is not None:
             if 'delete' in request.POST:
                 user = request.user
+                subs = Subscription.objects.filter(ship_address=Address.objects.filter(user=user))
+                for subscription in subs:
+                    subscription.stripe_cancel()
                 logout(request)
                 user.delete()
                 return HttpResponseRedirect('/signup/')
@@ -106,3 +168,24 @@ def settings(request):
         else:
             context['invalid_credentials'] = True
     return render(request, 'app/settings.html', context)
+
+
+@login_required
+def change(request, subscription_id):
+    try:
+        subscription = Subscription.objects.get(pk=subscription_id)
+        subscription.stripe_change_plan()
+    except Exception as e:
+        print(e)
+    return HttpResponseRedirect('/subscriptions/')
+
+
+@login_required
+def cancel(request, subscription_id):
+    try:
+        subscription = Subscription.objects.get(pk=subscription_id)
+        subscription.stripe_cancel()
+        subscription.delete()
+    except Exception as e:
+        print(e)
+    return HttpResponseRedirect('/subscriptions/')

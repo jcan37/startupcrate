@@ -34,7 +34,6 @@
         }
         .wide-button {
             width: 90%;
-            font-weight: bold;
         }
         .step-div {
             margin: 32px 8px 8px 8px;
@@ -155,7 +154,7 @@
             <div class="crate-card">
                 <h1>1 Month Plan</h1>
                 <div class="crate-price blue-text">
-                    <span class="value" id="days">$15.95</span><span class="units">/mo + $5 S/H</span>
+                    <span class="value">$15.95</span><span class="units">/mo + $5 S/H</span>
                 </div>
                 <img class="crate-img" src="{% static 'img/1month.png' %}">
                 <a class="wide-button blue btn btn-primary" href="/crate/1/">SELECT CRATE</a>
@@ -165,7 +164,7 @@
             <div class="crate-card">
                 <h1>3 Month Plan</h1>
                 <div class="crate-price blue-text">
-                    <span class="value" id="days">$14.25</span><span class="units">/mo + $5 S/H</span>
+                    <span class="value">$14.25</span><span class="units">/mo + $5 S/H</span>
                 </div>
                 <img class="crate-img" src="{% static 'img/3month.png' %}">
                 <a class="wide-button blue btn btn-primary" href="/crate/3/">SELECT CRATE</a>
@@ -182,7 +181,6 @@
             date.setDate(25);
             date.setHours(12, 0, 0, 0);
             countdown(date, function(ts) {
-                console.log(ts);
                 $('#days').html(ts.days);
                 $('#hours').html(ts.hours);
                 $('#minutes').html(ts.minutes);

@@ -1,5 +1,152 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 
 {% block title %}Select Crate - StartupCrate{% endblock %}
+{% block style %}
+    <style>
+        .nav-tabs > li, .nav-pills > li {
+            float: none;
+            display: inline-block;
+            *display: inline;
+            zoom: 1;
+        }
+        .spaced {
+            margin: 12px auto;
+        }
+        .wide-input {
+            margin: 8px auto;
+            width: 100%;
+            border-radius: 4px;
+        }
+        .crate-card {
+            margin: 16px;
+            padding: 16px;
+            background: white;
+            border-radius: 4px;
+        }
+        .crate-img {
+            margin: 8px 0;
+        }
+        .crate-price {
+            font-weight: bold;
+            color: #45b1e2;
+        }
+        .value {
+            font-size: 24px;
+            margin-left: 8px;
+        }
+        .units {
+            font-size: 12px;
+        }
+        .error-message {
+            color: red;
+        }
+        #crate-content {
+            min-height: 100vh;
+            padding: 96px 0 96px 0;
+            background: lightgray;
+        }
+    </style>
+{% endblock %}
 
-{% block content %}{% endblock %}
+{% block content %}
+    <div id="crate-content" class="row">
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-4 col-sm-4">
+            <h1>{% if plan == '1' %}1 Month Plan{% else %}3 Month Plan{% endif %}</h1>
+        </div>
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-4 col-sm-4">
+            <div class="crate-card">
+                <div class="crate-price">
+                    <span class="value">${% if plan == '1' %}15.95{% else %}14.25{% endif %}</span>
+                    <span class="units">/mo + $5 S/H</span>
+                </div>
+                <img class="crate-img"
+                     src="{% if plan == '1' %}{% static 'img/1month.png' %}{% else %}{% static 'img/3month.png' %}{% endif %}">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active">
+                        <a href="#personal" aria-controls="home" role="tab" data-toggle="tab">Personal</a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#gift" aria-controls="profile" role="tab" data-toggle="tab">Gift</a>
+                    </li>
+                </ul>
+                <div class="tab-content row">
+                    <div role="tabpanel" class="tab-pane fade in active" id="personal">
+                        <form id="personal-form" method="post" action="/crate/{{ plan }}/">
+                            {% csrf_token %}
+                            <div class="col-xs-12 col-sm-12">
+                                <label class="spaced">Ship to {{ personal_addr }}</label>
+                                <a class="spaced green btn btn-success" href="/settings/">Change Address</a>
+                            </div>
+                            <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                                    data-key="pk_test_1bUZjcVSz7uA1I558wNYBMee"
+                                    data-amount="{% if plan == '1' %}2095{% else %}5775{% endif %}"
+                                    data-name="StartupCrate"
+                                    data-description="{% if plan == '1' %}1{% else %}3{% endif %} month subscription"
+                                    data-zip-code="true"
+                                    data-locale="auto">
+                            </script>
+                        </form>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="gift">
+                        <form id="gift-form" method="post" action="/crate/{{ plan }}/">
+                            {% csrf_token %}
+                            <div class="col-xs-12 col-sm-12">
+                                <input name="recipient" class="wide-input form-control" type="text"
+                                       placeholder="Recipient's full name" maxlength="64">
+                            </div>
+                            <div class="col-xs-12 col-sm-12">
+                                <select name="pastaddr" class="wide-input form-control">
+                                    <option value="0">Select an address from your history</option>
+                                    {% for gift_addr in gift_addrs %}
+                                        <option value="{{ gift_addr.id }}">{{ gift_addr }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-xs-12 col-sm-12">
+                                <label>OR</label>
+                                <input name="newaddr" class="wide-input form-control" type="text"
+                                       placeholder="New gift address" maxlength="256">
+                            </div>
+                            <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                                    data-key="pk_test_1bUZjcVSz7uA1I558wNYBMee"
+                                    data-amount="{% if plan == '1' %}2095{% else %}5775{% endif %}"
+                                    data-name="StartupCrate"
+                                    data-description="{% if plan == '1' %}1{% else %}3{% endif %} month subscription"
+                                    data-zip-code="true"
+                                    data-locale="auto">
+                            </script>
+                        </form>
+                    </div>
+                </div>
+                {% if invalid %}
+                    <p class="spaced error-message">Invalid payment or fields submitted.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-xs-offset-0 col-xs-12 col-sm-offset-4 col-sm-4">
+            <h4>Looking for a different plan?
+                {% if plan == '1' %}
+                    <a href="/crate/3/">Upgrade.</a>
+                {% else %}
+                    <a href="/crate/1/">Downgrade.</a>
+                {% endif %}
+            </h4>
+        </div>
+    </div>
+{% endblock %}
+
+{% block execute %}
+    <script>
+        $(function() {
+            var pastAddress = $('select[name="pastaddr"]');
+            var newAddress = $('input[name="newaddr"]');
+            pastAddress.change(function() {
+                newAddress.val('');
+            });
+            newAddress.change(function() {
+                pastAddress.val('0');
+            });
+        });
+    </script>
+{% endblock %}
