@@ -141,7 +141,7 @@ def settings(request):
         if authenticate(username=username, password=password) is not None:
             if 'delete' in request.POST:
                 user = request.user
-                subs = Subscription.objects.filter(ship_address=Address.objects.filter(user=user))
+                subs = Subscription.objects.filter(ship_address__in=Address.objects.filter(user=user))
                 for subscription in subs:
                     subscription.stripe_cancel()
                 logout(request)
